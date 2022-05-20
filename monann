@@ -1,5 +1,7 @@
+Bước 1: Kết nối driver
 from google.colab import drive
 drive.mount('/content/drive')
+Bước 2: Load thư viện
 from keras import datasets, Sequential
 from keras.layers import Conv2D, Dense, MaxPooling2D, Flatten
 import matplotlib.pyplot as plt
@@ -14,17 +16,18 @@ from keras.preprocessing.image import load_img, img_to_array,array_to_img,ImageD
 import numpy as np
 import os
 import cv2 as cv
-monan = ['banh_beo','banh_bot_loc','banh_can','banh_cuon','banh_gio','banh_khot','banh_mi','banh_mi_nuong','banh_trang_nuong','banh_trang_tron','banh_xeo'] #Cái này sửa lại tùy theo thư mục của ae
+Bước 3: Tạo list
 
-dir_train = '/content/drive/MyDrive/mon_an'
+monan = ['banh_beo','banh_bot_loc','banh_can','banh_cuon','banh_gio','banh_khot','banh_mi','banh_mi_nuong','banh_trang_nuong','banh_trang_tron','banh_xeo']  
+dir_train = '/content/drive/MyDrive/mon_an' 
 dir_test = '/content/drive/MyDrive/mon_an' 
-
 
 listpath = []
 y_train = []
 x_train = []
 x_test = []
 y_test = []
+Bước 4: Tạo dữ liệu
 
 def create_data(dir, x_train, y_train):
   for i in monan:
@@ -32,61 +35,40 @@ def create_data(dir, x_train, y_train):
     index_label = monan.index(i)
     for j in os.listdir(path):
       img_path = os.path.join(path, j)
-      img = image.load_img(img_path, target_size=(125,125)) 
-      img = img_to_array(img)
-      img = img.reshape(125,125,3) 
-      img = img.astype('float32')
+      img = image.load_img(img_path, target_size=(125,125))       
+	img = img_to_array(img)
+      img = img.reshape(125,125,3      
+	img = img.astype('float32')
       img = img/255
       x_train.append(img)
       y_train.append(index_label)
-create_data(dir_train, x_train, y_train) #tạo dữ liệu 
-# xử lí dữ liệu
+create_data(dir_train, x_train, y_train) 
+Bước 5: Xử lí dữ liệu 
 x_train = np.array(x_train)
 y_train = np.array(y_train)
 y_train = np_utils.to_categorical(y_train, 12)
 print(x_train.shape) 
 print(y_train.shape)
-
-# Initialising the CNN
 model = Sequential()
-
-# Step 1 - Convolution
 model.add(Conv2D(32, 3, 3, input_shape = (125, 125, 3), activation = 'relu'))
-
-# Step 2 - Pooling
 model.add(MaxPooling2D(pool_size = (2, 2)))
-
-# Adding a second convolutional layer
 model.add(Conv2D(32, 3, 3, activation = 'relu'))
 model.add(MaxPooling2D(pool_size = (2, 2)))
-
-# Step 3 - Flattening
 model.add(Flatten())
-
-# Step 4 - Full connection
 model.add(Dense(128, activation = 'relu'))
 model.add(Dense(128, activation = 'relu'))
 model.add(Dense(128, activation = 'relu'))
 model.add(Dense( 12, activation = 'softmax'))
-
-# Compiling the CNN
 model.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
-
-
 history = model.fit(x_train,y_train,epochs = 40)
+
+Bước 6: Tạo model
 model.save('monan.h5')
+Bước 7: Lấy model
 from keras import models
 model_newmonan = models.load_model('monan.h5')
-#pic = image.load_img('/content/drive/MyDrive/CacMonAn/Oc/Oc (18).jpg', target_size=(60,60))
+Bước 8: Kiểm tra
 pic = image.load_img('banhmi.jpg', target_size=(125,125))
-plt.imshow(pic)
-pic = img_to_array(pic)
-pic = pic.reshape(1,125,125,3) 
-pic = pic.astype('float32')
-pic = pic/255
-np.argmax(model_newmonan.predict(pic), axis=1)
-#pic = image.load_img('/content/drive/MyDrive/CacMonAn/Oc/Oc (18).jpg', target_size=(60,60))
-pic = image.load_img('banhxeo.jpg', target_size=(125,125))
 plt.imshow(pic)
 pic = img_to_array(pic)
 pic = pic.reshape(1,125,125,3) 
